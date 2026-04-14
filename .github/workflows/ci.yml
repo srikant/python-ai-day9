@@ -1,4 +1,5 @@
 name: Python AI CI Pipeline
+
 on:
   push:
     branches: [ master ]
@@ -34,6 +35,9 @@ jobs:
         pip install -r requirements.txt
         pip install pytest pytest-cov
 
+    - name: Install package in editable mode
+      run: pip install -e .
+
     - name: Check for large files (Prevent Model Commits)
       run: |
         if find . -type f -size +50M | grep .; then echo "ERROR: Large file detected!" && exit 1; else echo "OK"; fi
@@ -61,11 +65,11 @@ jobs:
     name: Deploy AI Service to Render
     needs: test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     
     steps:
       - name: Deploy to Render
-        uses: johnbeynon/render-deploy-action@v0.0.8
+        uses: renderinc/render-deploy@v1
         with:
           service-id: ${{ secrets.RENDER_SERVICE_ID }}
-          api-key: ${{ secrets.RENDER_API_KEY }}        
+          api-key: ${{ secrets.RENDER_API_KEY }}
